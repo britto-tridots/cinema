@@ -1,0 +1,166 @@
+{% extends "templates/web.html" %}
+
+
+{% block head %}
+{{ super() }}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endblock %}
+
+{% block page_content %}
+<h2 class="text-xl font-bold mb-2 mt-0">
+  <span>{{ showtime.movie | upper}} </span><br>
+  <span>{{ frappe.format(showtime.show_date) }} </span><br>
+  <span> {{ showtime.show_time }}</span>
+</h2>
+
+<h3 class="text-center text-danger mb-6 mt-0">Select Your Tickets!</h3>
+
+<div id="seat-grid" class="mb-4 text-center"></div>
+
+<div class="mt-8 flex justify-center">
+  <div class="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
+    <h4 class="text-lg font-semibold mb-4 text-center">Enter Your Details</h4>
+
+    <input id="full_name"
+      class="w-full mb-3 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+      placeholder="Full Name" type="text" />
+
+    <input id="email"
+      class="w-full mb-4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+      placeholder="Email" type="email" />
+
+    <input id="phone_number"
+      class="w-full mb-4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+      placeholder="Phone Number" type="text" />
+
+    <button id="confirm" class="btn btn-primary w-full mb-3 px-4 py-2 mt-2" disabled>Book Now</button>
+  </div>
+</div>
+
+<style>
+  #seat-grid button:not(:disabled) {
+    background-color: #86efac;
+    transition: all 0.2s ease;
+    color: black;
+  }
+
+  #seat-grid button.selected {
+    background-color: #4ade80;
+    color: white;
+    font-weight: bold;
+  }
+
+  #seat-grid button:disabled {
+    background-color: #d1d5db;
+    cursor: not-allowed;
+    color: #6b7280;
+  }
+</style>
+
+
+{% endblock %}
+
+
+{% block script %}
+<script>
+  const seatLayout = JSON.parse('{{ layout | tojson | safe }}');
+  const showtimeId = "{{ showtime.name }}";
+  const picked = new Set();
+
+  function drawSeats() {
+    const grid = document.getElementById("seat-grid");
+    seatLayout.rows.forEach(r => {
+      const rowDiv = document.createElement("div");
+      rowDiv.innerHTML = `<strong>${r.row_label}</strong> `;
+      r.seats.forEach(s => {
+        const btn = document.createElement("button");
+        btn.textContent = s.id;
+        btn.className = "border text-xs m-1 px-2 py-1 rounded";
+        if (s.taken) {
+          btn.disabled = true;
+          btn.classList.add("opacity-40");
+        }
+        btn.onclick = () => {
+          if (btn.classList.toggle("selected")) {
+            picked.add(s.id);
+          } else {
+            picked.delete(s.id);
+          }
+          document.getElementById("confirm").disabled = picked.size === 0;
+        };
+        rowDiv.appendChild(btn);
+      });
+      grid.appendChild(rowDiv);
+    });
+  }
+  drawSeats();
+
+  document.getElementById("confirm").onclick = async () => {
+    const name = document.getElementById("full_name").value;
+    const mail = document.getElementById("email").value;
+    const phone = document.getElementById("phone_number").value;
+    if (!name || !mail || !phone) return frappe.msgprint("All fields are required");
+
+    const selectedSeats = Array.from(picked);
+    const amount = selectedSeats.length * 150 * 100; // in paise
+
+    // Create Razorpay order 
+    const options = {
+      key: "rzp_test_1DP5mmOlF5G5ag",  // api test key
+      amount: amount,
+      currency: "INR",
+      name: name,
+      description: "Movie Ticket Booking",
+      handler: async function (response) {
+        // If payment is successful, create booking
+        try {
+          const r = await frappe.call({
+            method: "cinema.cinema.api.create_booking",
+            args: {
+              full_name: name,
+              email: mail,
+              phone: phone,
+              showtime: "{{ showtime.name }}",
+              selected_seats: selectedSeats,
+              razorpay_payment_id: response.razorpay_payment_id
+            }
+          });
+
+          const bookingId = r.message.booking_id;
+
+          frappe.msgprint({
+            message: `Booking success! Redirecting to ticket...`,
+            title: "Success",
+            indicator: "green"
+          });
+
+          setTimeout(() => {
+            window.open(`/ticket/${bookingId}`, "_blank");
+          }, 1500);
+
+        } catch (e) {
+          frappe.msgprint("Booking failed after payment. Please contact support.");
+        }
+      },
+      prefill: {
+        name: name,
+        email: mail,
+        contact: phone
+      },
+      theme: {
+        color: "#22c55e"
+      },
+      modal: {
+        ondismiss: function () {
+          frappe.msgprint("Payment was cancelled.");
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+  };
+
+</script>
+
+{% endblock %}
