@@ -36,7 +36,7 @@ def get_seat_layout(showtime):
 
 
 @frappe.whitelist(allow_guest=True)
-def create_booking(full_name, email, phone, showtime, selected_seats, razorpay_payment_id=None, razorpay_order_id=None):
+def create_booking(full_name, email, phone, showtime, selected_seats, razorpay_payment_id=None):
     selected = json.loads(selected_seats) if isinstance(selected_seats, str) else selected_seats
     if not selected:
         frappe.throw(_("No seats selected"))

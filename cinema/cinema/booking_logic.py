@@ -16,6 +16,7 @@ def validate_seats(doc, method):
     if not seats:
         frappe.throw(_("Seat numbers cannot be empty."))
 
+    # Except the current booking! validate all other booking with same showtime
     bookings = frappe.get_all(
         "Booking",
         filters={

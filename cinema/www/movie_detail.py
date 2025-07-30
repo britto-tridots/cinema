@@ -61,16 +61,20 @@ def get_context(context):
 
         theatre_showtimes[st.theatre].append(st)
         print(f"{st.name}: {len(booked_seats)} / {total_seats} = {fill_percent}%")
-
+        print("---------------", theatre_showtimes)
 
     for show_list in theatre_showtimes.values():
         show_list.sort(key=lambda s: s.show_time_obj)
 
     theatre_ids = list(theatre_showtimes.keys())
+    print("-------------", theatre_ids)
+
     theatres = frappe.get_all("Theatre",
         filters={"name": ["in", theatre_ids]} if theatre_ids else {},
         fields=["name", "theatre_name", "location"]
     )
+
+    print("----", theatres)
 
     context.movie = movie
     context.theatres = theatres

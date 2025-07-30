@@ -9,13 +9,12 @@ def send_showtime_reminders():
     # get all showtimes from today or later
     showtimes = frappe.get_all("Showtime",
         filters={
-            "show_date": ["<=", target.date().isoformat()]  # only today and past
+            "show_date": ["<=", target.date().isoformat()]  
         },
         fields=["name", "show_date", "show_time"]
     )
 
     for st in showtimes:
-        # Combine date + time
         show_datetime_str = f"{st.show_date} {st.show_time}"
         try:
             show_dt = datetime.strptime(show_datetime_str, "%Y-%m-%d %I:%M %p")
@@ -23,7 +22,6 @@ def send_showtime_reminders():
             frappe.log_error(f"Invalid showtime format: {show_datetime_str}", "Reminder Scheduler")
             continue
 
-        # Check if it's exactly 30 mins from now (within a 1-min margin)
         delta = (show_dt - now).total_seconds()
         if 1740 <= delta <= 1860:  # between 29 and 31 mins
             bookings = frappe.get_all("Booking",
