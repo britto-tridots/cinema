@@ -3,7 +3,6 @@
 
 frappe.ui.form.on('Theatre', {
   refresh(frm) {
-    //  Generate Layout button
     if (!frm.is_new()) {
       frm.add_custom_button('Generate Layout for Selected Screen', () => {
         const selected = frm.fields_dict['screen'].grid.get_selected_children();
@@ -15,8 +14,8 @@ frappe.ui.form.on('Theatre', {
 
         frappe.prompt([
           { fieldname: 'rows', label: 'Rows', fieldtype: 'Int', default: 10, reqd: 1 },
-          { fieldname: 'per_row', label: 'Seats / Row', fieldtype: 'Int', default: 12, reqd: 1 },
-          { fieldname: 'aisle_after', label: 'Aisle After Seat ', fieldtype: 'Int', default: 6, reqd: 1 }
+          { fieldname: 'seats_per_row', label: 'Seats / Row', fieldtype: 'Int', default: 10, reqd: 1 },
+          { fieldname: 'aisle_after', label: 'Aisle After Seat ', fieldtype: 'Int', default: 5, reqd: 1 }
         ], (value) => {
           frappe.call({
             method: 'cinema.cinema.api.generate_seat_layout',

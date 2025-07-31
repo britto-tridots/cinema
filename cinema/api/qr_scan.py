@@ -26,7 +26,5 @@ def verify_qr(booking_id):
 
     # Update Booking status
     frappe.db.set_value("Booking", booking.name, "status", "Checked-In")
-
-
     return {"status": "checked_in", "booking": booking.name}
 
