@@ -16,7 +16,7 @@ frappe.pages['booking-dashboard'].on_page_load = function (wrapper) {
 			chart = new frappe.Chart("#booking-chart", {
 				title: "No. of tickets booked vs Showtime",
 				data: r.message,
-				type: 'line',
+				type: 'bar',
 				height: 400
 			});
 		}

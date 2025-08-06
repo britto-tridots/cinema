@@ -21,8 +21,7 @@ frappe.ui.form.on('Theatre', {
             method: 'cinema.cinema.api.generate_seat_layout',
             args: value,
             callback: r => {
-              frappe.model.set_value(row.doctype, row.name,
-                'seat_layout_json', r.message);
+              frappe.model.set_value(row.doctype, row.name, 'seat_layout_json', r.message);
               frm.refresh_field('screen');
             }
           });

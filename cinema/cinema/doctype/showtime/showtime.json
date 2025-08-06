@@ -1,4 +1,6 @@
 {
+ "_comments": "[]",
+ "_liked_by": "[]",
  "actions": [],
  "allow_rename": 1,
  "autoname": "field:show_time",
@@ -34,10 +36,9 @@
   {
    "depends_on": "theatre",
    "fieldname": "screen",
-   "fieldtype": "Link",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Screen",
-   "options": "Screen",
    "reqd": 1
   },
   {
@@ -68,7 +69,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-19 19:18:48.993186",
+ "modified": "2025-08-01 15:20:20.239344",
  "modified_by": "Administrator",
  "module": "Cinema",
  "name": "Showtime",
